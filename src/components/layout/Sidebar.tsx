@@ -13,8 +13,8 @@ import {
   HandCoins,
   ChevronLeft,
   ChevronRight,
-  Wallet,
 } from 'lucide-react';
+import { SplitLogo } from '@/components/ui/SplitLogo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -44,10 +44,8 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-16 border-b">
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md">
-          <Wallet className="w-5 h-5" />
-        </div>
-        {!collapsed && <span className="font-bold text-lg tracking-tight">Splito</span>}
+        <SplitLogo size={34} />
+        {!collapsed && <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">Splito</span>}
       </div>
 
       {/* Navigation */}

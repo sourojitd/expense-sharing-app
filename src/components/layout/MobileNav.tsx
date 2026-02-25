@@ -15,8 +15,8 @@ import {
   RefreshCw,
   HandCoins,
   LayoutDashboard,
-  Wallet,
 } from 'lucide-react';
+import { SplitLogo } from '@/components/ui/SplitLogo';
 import { cn } from '@/lib/utils';
 import {
   Sheet,
@@ -46,10 +46,8 @@ export function MobileNavContent() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 px-4 h-16 border-b">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-          <Wallet className="w-5 h-5" />
-        </div>
-        <span className="font-bold text-lg tracking-tight">Splito</span>
+        <SplitLogo size={30} />
+        <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">Splito</span>
       </div>
       <nav className="flex-1 p-3 space-y-1">
         {menuNavItems.map((item) => {
@@ -118,8 +116,8 @@ export function MobileBottomNav() {
           <Link
             href="/expenses/new"
             className={cn(
-              'flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground -mt-5 shadow-lg shadow-primary/30',
-              'transition-all duration-150 active:scale-90 hover:shadow-xl hover:shadow-primary/40 hover:brightness-110'
+              'flex items-center justify-center w-12 h-12 rounded-full btn-gradient-primary text-white -mt-5 shadow-lg shadow-blue-500/30',
+              'transition-all duration-150 active:scale-90 hover:shadow-xl hover:shadow-blue-500/40'
             )}
           >
             <Plus className="h-6 w-6" />
@@ -161,10 +159,8 @@ export function MobileBottomNav() {
             <SheetHeader className="px-4 pt-4 pb-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-                    <Wallet className="w-5 h-5" />
-                  </div>
-                  <SheetTitle className="text-lg font-bold tracking-tight">Splito</SheetTitle>
+                  <SplitLogo size={30} />
+                  <SheetTitle className="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">Splito</SheetTitle>
                 </div>
               </div>
             </SheetHeader>

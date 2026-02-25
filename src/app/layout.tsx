@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   description:
     'The smart way to split bills, track shared expenses, and settle up with friends. Manage group expenses effortlessly.',
   keywords: ['expense sharing', 'bill splitting', 'group expenses', 'settle up', 'split bills'],
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import {
-  Wallet,
   Users,
   Receipt,
   PieChart,
@@ -13,6 +12,7 @@ import {
   Zap,
   Shield,
 } from 'lucide-react';
+import { SplitLogo } from '@/components/ui/SplitLogo';
 
 const features = [
   {
@@ -60,10 +60,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md">
-              <Wallet className="w-5 h-5" />
-            </div>
-            <span className="font-bold text-xl tracking-tight">Splito</span>
+            <SplitLogo size={36} />
+            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">Splito</span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -87,7 +85,7 @@ export default function LandingPage() {
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Split Expenses,{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500">
                 Not Friendships
               </span>
             </h1>
@@ -176,8 +174,8 @@ export default function LandingPage() {
       <footer className="border-t">
         <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Splito</span>
+            <SplitLogo size={24} animated={false} />
+            <span className="font-semibold bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">Splito</span>
           </div>
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Splito. Split expenses, not friendships.
