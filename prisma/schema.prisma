@@ -1,0 +1,364 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String   @map("password_hash")
+  name              String
+  phone             String?
+  profilePicture    String?  @map("profile_picture")
+  preferredCurrency String   @default("USD") @map("preferred_currency")
+  emailVerified     Boolean  @default(false) @map("email_verified")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  createdGroups     Group[]           @relation("GroupCreator")
+  groupMemberships  GroupMember[]
+  paidExpenses      Expense[]         @relation("ExpensePayer")
+  expenseSplits     ExpenseSplit[]
+  sentPayments      Payment[]         @relation("PaymentSender")
+  receivedPayments  Payment[]         @relation("PaymentReceiver")
+  sentFriendRequests FriendRequest[]  @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+  activities        Activity[]
+  customCategories  CustomCategory[]
+  expenseComments   ExpenseComment[]
+  itemConsumptions  ExpenseItemConsumer[]
+  messages          Message[]
+  recurringExpenses RecurringExpense[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator           User              @relation("GroupCreator", fields: [createdBy], references: [id])
+  members           GroupMember[]
+  expenses          Expense[]
+  payments          Payment[]
+  activities        Activity[]
+  messages          Message[]
+  recurringExpenses RecurringExpense[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String @id @default(uuid())
+  groupId  String @map("group_id")
+  userId   String @map("user_id")
+  role     String @default("member") // member, admin
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  description String
+  amount      Decimal  @db.Decimal(12, 2)
+  currency    String
+  date        DateTime @db.Date
+  paidBy      String   @map("paid_by")
+  groupId     String?  @map("group_id")
+  category    String?
+  receipt     String?
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  payer    User              @relation("ExpensePayer", fields: [paidBy], references: [id])
+  group    Group?            @relation(fields: [groupId], references: [id])
+  splits   ExpenseSplit[]
+  items    ExpenseItem[]
+  comments ExpenseComment[]
+
+  @@map("expenses")
+}
+
+model ExpenseSplit {
+  id         String  @id @default(uuid())
+  expenseId  String  @map("expense_id")
+  userId     String  @map("user_id")
+  amount     Decimal @db.Decimal(12, 2)
+  percentage Decimal? @db.Decimal(5, 2)
+  shares     Int?
+  settled    Boolean @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expense_splits")
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  fromUserId  String        @map("from_user_id")
+  toUserId    String        @map("to_user_id")
+  amount      Decimal       @db.Decimal(12, 2)
+  currency    String
+  method      String        // cash, paypal, venmo, bank_transfer, upi, etc.
+  status      PaymentStatus @default(PENDING)
+  groupId     String?       @map("group_id")
+  note        String?
+  confirmedAt DateTime?     @map("confirmed_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  settledAt   DateTime?     @map("settled_at")
+
+  // Relations
+  fromUser User   @relation("PaymentSender", fields: [fromUserId], references: [id])
+  toUser   User   @relation("PaymentReceiver", fields: [toUserId], references: [id])
+  group    Group? @relation(fields: [groupId], references: [id])
+
+  @@index([fromUserId, status])
+  @@index([toUserId, status])
+  @@index([groupId])
+  @@map("payments")
+}
+
+model FriendRequest {
+  id         String              @id @default(uuid())
+  senderId   String              @map("sender_id")
+  receiverId String              @map("receiver_id")
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+
+  // Relations
+  sender   User @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friend_requests")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// ============ Phase 2 Models ============
+
+model Activity {
+  id         String       @id @default(uuid())
+  type       ActivityType
+  userId     String       @map("user_id")
+  groupId    String?      @map("group_id")
+  entityId   String       @map("entity_id")
+  entityType String       @map("entity_type") // expense, payment, group, friend_request
+  metadata   Json?
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([groupId, createdAt])
+  @@map("activities")
+}
+
+enum ActivityType {
+  EXPENSE_CREATED
+  EXPENSE_UPDATED
+  EXPENSE_DELETED
+  PAYMENT_RECORDED
+  PAYMENT_CONFIRMED
+  GROUP_CREATED
+  GROUP_MEMBER_ADDED
+  GROUP_MEMBER_REMOVED
+  COMMENT_ADDED
+  FRIEND_REQUEST_SENT
+  FRIEND_REQUEST_ACCEPTED
+}
+
+model ExpenseItem {
+  id        String   @id @default(uuid())
+  expenseId String   @map("expense_id")
+  name      String
+  amount    Decimal  @db.Decimal(12, 2)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  expense   Expense              @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  consumers ExpenseItemConsumer[]
+
+  @@map("expense_items")
+}
+
+model ExpenseItemConsumer {
+  id     String @id @default(uuid())
+  itemId String @map("item_id")
+  userId String @map("user_id")
+
+  // Relations
+  item ExpenseItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, userId])
+  @@map("expense_item_consumers")
+}
+
+model CustomCategory {
+  id     String  @id @default(uuid())
+  name   String
+  icon   String?
+  color  String?
+  userId String  @map("user_id")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@map("custom_categories")
+}
+
+model ExpenseComment {
+  id        String   @id @default(uuid())
+  expenseId String   @map("expense_id")
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expenseId, createdAt])
+  @@map("expense_comments")
+}
+
+// ============ Phase 3 Models ============
+
+model Message {
+  id        String      @id @default(uuid())
+  groupId   String      @map("group_id")
+  userId    String      @map("user_id")
+  content   String
+  type      MessageType @default(TEXT)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, createdAt])
+  @@map("messages")
+}
+
+enum MessageType {
+  TEXT
+  SYSTEM
+  EXPENSE
+  PAYMENT
+}
+
+model RecurringExpense {
+  id              String             @id @default(uuid())
+  description     String
+  amount          Decimal            @db.Decimal(12, 2)
+  currency        String
+  paidBy          String             @map("paid_by")
+  groupId         String?            @map("group_id")
+  category        String?
+  splitType       String             @map("split_type")
+  frequency       RecurringFrequency
+  startDate       DateTime           @db.Date @map("start_date")
+  endDate         DateTime?          @db.Date @map("end_date")
+  nextDueDate     DateTime           @db.Date @map("next_due_date")
+  isActive        Boolean            @default(true) @map("is_active")
+  participantData Json               @map("participant_data")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  payer User   @relation(fields: [paidBy], references: [id])
+  group Group? @relation(fields: [groupId], references: [id])
+
+  @@index([nextDueDate, isActive])
+  @@map("recurring_expenses")
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model Notification {
+  id        String               @id @default(uuid())
+  userId    String               @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean              @default(false) @map("is_read")
+  priority  NotificationPriority @default(NORMAL)
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  EXPENSE_ADDED
+  PAYMENT_RECEIVED
+  PAYMENT_REMINDER
+  FRIEND_REQUEST
+  GROUP_INVITE
+  SETTLEMENT_DUE
+  RECURRING_DUE
+  COMMENT_ADDED
+  SYSTEM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
