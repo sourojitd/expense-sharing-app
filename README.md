@@ -1,164 +1,149 @@
-# Expense Sharing App
+# Splito — Web Application
 
-A comprehensive expense-sharing web application built with Next.js, TypeScript, and PostgreSQL. This application allows users to track shared expenses, split bills among friends and groups, manage debts, and settle payments.
+The Next.js 15 web application for Splito. Built with React 19, Tailwind CSS 4, and Radix UI.
 
-## Features
-
-- User authentication and profile management
-- Friend and contact management
-- Group creation and management
-- Expense creation with flexible splitting options
-- Balance tracking and debt management
-- Payment processing and settlement
-- Real-time notifications
-- Multi-currency support
-- Analytics and reporting
-- Offline functionality (PWA)
-
-## Tech Stack
-
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Backend**: Node.js, Express.js, Prisma ORM
-- **Database**: PostgreSQL, Redis
-- **Authentication**: NextAuth.js, JWT
-- **Testing**: Jest, React Testing Library
-- **Development**: ESLint, Prettier, Docker
-
-## Prerequisites
-
-- Node.js 18+ and npm
-- Docker and Docker Compose
-- Git
-
-## Getting Started
-
-### 1. Clone and Install Dependencies
+## Quick Start
 
 ```bash
-git clone <repository-url>
-cd expense-sharing-app
+# Install dependencies
 npm install
-```
 
-### 2. Environment Setup
+# Copy environment config
+cp .env.example .env
 
-Copy the `.env` file and update the values:
-
-```bash
-cp .env .env.local
-```
-
-Update the following variables in `.env.local`:
-- `JWT_SECRET`: A secure random string for JWT signing
-- `JWT_REFRESH_SECRET`: A secure random string for refresh tokens
-- `NEXTAUTH_SECRET`: A secure random string for NextAuth
-- `NEXTAUTH_URL`: Your application URL (http://localhost:3000 for development)
-
-### 3. Start Database Services
-
-Make sure Docker Desktop is running, then start the PostgreSQL and Redis services:
-
-```bash
+# Start PostgreSQL + Redis
 npm run docker:up
-```
 
-### 4. Database Setup
-
-Generate Prisma client and run migrations:
-
-```bash
+# Set up the database
 npm run db:generate
 npm run db:migrate
-```
 
-### 5. Start Development Server
+# Seed test data (optional)
+npm run db:seed
 
-```bash
+# Start dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the application.
+Open [http://localhost:3000](http://localhost:3000)
 
-## Available Scripts
+## Test Accounts
 
-- `npm run dev` - Start development server with Turbopack
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
-- `npm run test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
-- `npm run db:migrate` - Run database migrations
-- `npm run db:studio` - Open Prisma Studio
-- `npm run docker:up` - Start Docker services
-- `npm run docker:down` - Stop Docker services
+After running `npm run db:seed`:
+
+| Name | Email | Password |
+|---|---|---|
+| Alice Johnson | `alice@splito.dev` | `Password123!` |
+| Bob Smith | `bob@splito.dev` | `Password123!` |
+| Charlie Brown | `charlie@splito.dev` | `Password123!` |
+| Diana Prince | `diana@splito.dev` | `Password123!` |
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router, Turbopack)
+- **UI**: React 19, Tailwind CSS 4, Radix UI, Lucide icons
+- **Auth**: JWT access/refresh tokens, bcrypt
+- **Database**: PostgreSQL 15 (Prisma 6 ORM), Redis 7
+- **Testing**: Jest 30, React Testing Library
+- **Code Quality**: ESLint 9, Prettier 3.6, TypeScript 5
+
+## Scripts
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Development server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run test` | Run test suite (24 files) |
+| `npm run test:coverage` | Test coverage report |
+| `npm run lint` | ESLint check |
+| `npm run lint:fix` | Auto-fix lint issues |
+| `npm run format` | Prettier format |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:migrate` | Run database migrations |
+| `npm run db:seed` | Seed test data |
+| `npm run db:studio` | Open Prisma Studio |
+| `npm run docker:up` | Start Docker services |
+| `npm run docker:down` | Stop Docker services |
 
 ## Project Structure
 
 ```
-expense-sharing-app/
-├── src/
-│   ├── app/                 # Next.js app directory
-│   ├── components/          # React components
-│   ├── lib/                 # Utility libraries
-│   │   ├── prisma.ts       # Prisma client
-│   │   └── redis.ts        # Redis client
-│   └── types/              # TypeScript type definitions
-├── prisma/
-│   └── schema.prisma       # Database schema
-├── docker-compose.yml      # Docker services
-├── .env                    # Environment variables
-└── README.md
+src/
++-- app/
+|   +-- (app)/              # Authenticated pages
+|   |   +-- dashboard/      # Main dashboard
+|   |   +-- groups/         # Group management
+|   |   +-- expenses/       # Expense CRUD
+|   |   +-- friends/        # Friend management
+|   |   +-- settings/       # User settings + theme
+|   |   +-- settle/         # Payment settlements
+|   |   +-- activity/       # Activity feed
+|   |   +-- recurring/      # Recurring expenses
+|   +-- (auth)/             # Login, register, forgot password
+|   +-- api/                # 60+ REST API endpoints
+|   +-- globals.css         # Theme variables, animations
++-- components/
+|   +-- ui/                 # 24 Radix-based components
+|   +-- layout/             # AppShell, Sidebar, TopBar, MobileNav
+|   +-- theme/              # ThemeProvider, ThemeToggle
+|   +-- expenses/           # Expense-specific components
+|   +-- groups/             # Group-specific components
++-- lib/
+    +-- services/           # 17 business logic services
+    +-- repositories/       # 11 data access layers
+    +-- models/             # Zod validation schemas
+    +-- middleware/          # JWT auth middleware
+    +-- hooks/              # useApi, useToast, useKeyboardShortcuts
+    +-- utils/              # Helpers and constants
 ```
 
-## Database Schema
+## Environment Variables
 
-The application uses PostgreSQL with the following main entities:
+See `.env.example` for all configuration options. Key variables:
 
-- **Users**: User accounts and profiles
-- **Groups**: Expense groups for organizing shared expenses
-- **Expenses**: Individual expense records
-- **ExpenseSplits**: How expenses are split among users
-- **Payments**: Payment records and settlements
-- **FriendRequests**: Friend relationship management
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `JWT_SECRET` | Yes | Secret for signing access tokens |
+| `JWT_REFRESH_SECRET` | Yes | Secret for signing refresh tokens |
+| `NEXTAUTH_SECRET` | Yes | NextAuth encryption key |
+| `NEXTAUTH_URL` | Yes | Application base URL |
 
-## Development Guidelines
+## API Overview
 
-### Code Style
+60+ REST endpoints organized by domain:
 
-- Use TypeScript for type safety
-- Follow ESLint and Prettier configurations
-- Write tests for new features
-- Use meaningful commit messages
+- **Auth** (`/api/auth/*`) — Register, login, tokens, password reset
+- **Expenses** (`/api/expenses/*`) — CRUD, splits, analytics, export
+- **Groups** (`/api/groups/*`) — CRUD, members, messages
+- **Payments** (`/api/payments/*`) — Record, confirm, reminders
+- **Balances** (`/api/balances/*`) — Real-time, simplified debts
+- **Friends** (`/api/friends/*`) — Requests, search
+- **Notifications** (`/api/notifications/*`) — CRUD, mark read
+- **Profile** (`/api/profile/*`) — Update, upload picture
+- **Dashboard** (`/api/dashboard/summary`) — Overview stats
 
-### Testing
+## Theme System
 
-- Write unit tests for utilities and services
-- Write component tests for React components
-- Write integration tests for API endpoints
-- Aim for good test coverage
+The app supports **Light**, **Dark**, and **System** themes:
 
-### Database
+- **ThemeProvider**: Wraps the app with `next-themes`
+- **ThemeToggle**: Dropdown in the top bar (desktop) and mobile menu
+- **Settings Page**: Visual theme previews with animated selection
+- **CSS**: Gradient buttons with shine animations, dark mode glow effects
 
-- Use Prisma migrations for schema changes
-- Always backup before major changes
-- Use transactions for financial operations
-- Maintain data integrity constraints
+## Testing
 
-## Contributing
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Generate coverage report
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write tests
-5. Run linting and formatting
-6. Submit a pull request
+24 test files covering services, repositories, API endpoints, middleware, and models.
 
 ## License
 
-This project is licensed under the MIT License.
+MIT
