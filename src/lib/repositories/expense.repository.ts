@@ -102,7 +102,7 @@ export class ExpenseRepository {
     });
   }
 
-  async getExpenses(filters: ExpenseFilters = {}): Promise<ExpenseWithSplits[]> {
+  private buildWhereClause(filters: ExpenseFilters = {}): any {
     const {
       groupId,
       userId,
@@ -110,8 +110,10 @@ export class ExpenseRepository {
       dateFrom,
       dateTo,
       settled,
-      limit = 50,
-      offset = 0,
+      search,
+      amountMin,
+      amountMax,
+      paidByUserId,
     } = filters;
 
     const where: any = {};
@@ -144,6 +146,27 @@ export class ExpenseRepository {
         },
       };
     }
+
+    if (search) {
+      where.description = { contains: search, mode: 'insensitive' };
+    }
+
+    if (amountMin !== undefined || amountMax !== undefined) {
+      where.amount = {};
+      if (amountMin !== undefined) where.amount.gte = amountMin;
+      if (amountMax !== undefined) where.amount.lte = amountMax;
+    }
+
+    if (paidByUserId) {
+      where.paidBy = paidByUserId;
+    }
+
+    return where;
+  }
+
+  async getExpenses(filters: ExpenseFilters = {}): Promise<ExpenseWithSplits[]> {
+    const { limit = 50, offset = 0 } = filters;
+    const where = this.buildWhereClause(filters);
 
     const expenses = await this.prisma.expense.findMany({
       where,
@@ -182,6 +205,11 @@ export class ExpenseRepository {
     });
 
     return expenses;
+  }
+
+  async countExpenses(filters: ExpenseFilters = {}): Promise<number> {
+    const where = this.buildWhereClause(filters);
+    return await this.prisma.expense.count({ where });
   }
 
   async getUserExpenses(userId: string, filters: Omit<ExpenseFilters, 'userId'> = {}): Promise<ExpenseWithSplits[]> {

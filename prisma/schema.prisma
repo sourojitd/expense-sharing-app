@@ -47,6 +47,7 @@ model Group {
   name        String
   description String?
   image       String?
+  type        GroupType @default(FRIENDS)
   createdBy   String   @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -206,6 +207,16 @@ enum ActivityType {
   COMMENT_ADDED
   FRIEND_REQUEST_SENT
   FRIEND_REQUEST_ACCEPTED
+  PAYMENT_REMINDER_SENT
+}
+
+enum GroupType {
+  HOME
+  TRIP
+  COUPLE
+  BUSINESS
+  FRIENDS
+  OTHER
 }
 
 model ExpenseItem {

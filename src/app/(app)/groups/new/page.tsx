@@ -8,13 +8,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/lib/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { GROUP_TYPES } from '@/lib/constants/group-types';
 
 export default function NewGroupPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [type, setType] = useState('FRIENDS');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { tokens } = useAuth();
   const router = useRouter();
@@ -30,7 +39,7 @@ export default function NewGroupPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${tokens?.accessToken}`,
         },
-        body: JSON.stringify({ name, description: description || undefined }),
+        body: JSON.stringify({ name, description: description || undefined, type }),
       });
       if (!res.ok) throw new Error('Failed to create group');
       const data = await res.json();
@@ -67,6 +76,27 @@ export default function NewGroupPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type">Group Type</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GROUP_TYPES.map((gt) => {
+                    const Icon = gt.icon;
+                    return (
+                      <SelectItem key={gt.value} value={gt.value}>
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {gt.label}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description (optional)</Label>

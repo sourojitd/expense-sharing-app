@@ -29,6 +29,7 @@ import {
   Download,
 } from 'lucide-react';
 import { cn, formatCurrency, getInitials } from '@/lib/utils';
+import { getGroupTypeConfig } from '@/lib/constants/group-types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +39,7 @@ interface GroupDetail {
   id: string;
   name: string;
   description: string | null;
+  type: string;
   createdBy: string;
   members: Array<{
     id: string;
@@ -543,8 +545,18 @@ export default function GroupDetailPage() {
           </Link>
         </Button>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold tracking-tight truncate">{group.name}</h1>
+            {(() => {
+              const typeConfig = getGroupTypeConfig(group.type || 'FRIENDS');
+              const TypeIcon = typeConfig.icon;
+              return (
+                <Badge variant="outline" className={cn('shrink-0', typeConfig.badgeColor)}>
+                  <TypeIcon className="h-3 w-3 mr-1" />
+                  {typeConfig.label}
+                </Badge>
+              );
+            })()}
             <Badge variant="secondary" className="shrink-0">
               <Users className="h-3 w-3 mr-1" />
               {group.members?.length || 0} members

@@ -417,6 +417,25 @@ export class ExpenseService {
   }
 
   /**
+   * Count expenses matching filters
+   */
+  async countExpenses(filters: ExpenseFilters, userId: string): Promise<number> {
+    if (filters.groupId) {
+      const isMember = await this.groupRepository.isUserMember(filters.groupId, userId);
+      if (!isMember) {
+        throw new Error('Access denied: You are not a member of this group');
+      }
+    }
+
+    const effectiveFilters = {
+      ...filters,
+      userId: filters.userId || userId,
+    };
+
+    return await this.expenseRepository.countExpenses(effectiveFilters);
+  }
+
+  /**
    * Get user's unsettled splits
    */
   async getUserUnsettledSplits(userId: string): Promise<ExpenseSplit[]> {

@@ -435,7 +435,7 @@ function SettleUpDialog({
 
 export default function SettlePage() {
   const { user } = useAuth();
-  const { get, put } = useApi();
+  const { get, put, post } = useApi();
   const { toast } = useToast();
 
   // Data state
@@ -451,6 +451,7 @@ export default function SettlePage() {
   // Action loading states
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [remindingUserId, setRemindingUserId] = useState<string | null>(null);
 
   // Derived data
   const youOwe = balanceSummary?.balances.filter((b) => b.amount < 0) || [];
@@ -501,11 +502,34 @@ export default function SettlePage() {
     setSettleDialogOpen(true);
   };
 
-  const handleRemind = (balance: UserBalance) => {
-    toast({
-      title: 'Reminder sent',
-      description: `A reminder has been sent to ${balance.userName}.`,
-    });
+  const handleRemind = async (balance: UserBalance) => {
+    setRemindingUserId(balance.userId);
+    try {
+      const result = await post('/api/payments/remind', {
+        toUserId: balance.userId,
+      });
+
+      if (result.success) {
+        toast({
+          title: 'Reminder sent',
+          description: `A payment reminder has been sent to ${balance.userName}.`,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Could not send reminder',
+          description: result.error || 'Something went wrong.',
+        });
+      }
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to send reminder.',
+      });
+    } finally {
+      setRemindingUserId(null);
+    }
   };
 
   const handleConfirmPayment = async (paymentId: string) => {
@@ -744,9 +768,14 @@ export default function SettlePage() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleRemind(balance)}
+                      disabled={remindingUserId === balance.userId}
                       className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20 shrink-0"
                     >
-                      <Bell className="h-3.5 w-3.5 mr-1.5" />
+                      {remindingUserId === balance.userId ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                      ) : (
+                        <Bell className="h-3.5 w-3.5 mr-1.5" />
+                      )}
                       Remind
                     </Button>
                   </div>

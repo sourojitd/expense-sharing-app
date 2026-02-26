@@ -28,11 +28,19 @@ export async function GET(request: NextRequest) {
       settled: searchParams.get('settled') ? searchParams.get('settled') === 'true' : undefined,
       limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined,
       offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined,
+      search: searchParams.get('search') || undefined,
+      amountMin: searchParams.get('amountMin') ? parseFloat(searchParams.get('amountMin')!) : undefined,
+      amountMax: searchParams.get('amountMax') ? parseFloat(searchParams.get('amountMax')!) : undefined,
+      paidByUserId: searchParams.get('paidByUserId') || undefined,
     };
 
-    const expenses = await expenseService.getExpenses(filters, authResult.user!.userId);
-    
-    return NextResponse.json({ expenses });
+    const userId = authResult.user!.userId;
+    const [expenses, totalCount] = await Promise.all([
+      expenseService.getExpenses(filters, userId),
+      expenseService.countExpenses(filters, userId),
+    ]);
+
+    return NextResponse.json({ expenses, totalCount });
   } catch (error) {
     console.error('Get expenses error:', error);
     return NextResponse.json(

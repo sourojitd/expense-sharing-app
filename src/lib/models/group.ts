@@ -1,16 +1,27 @@
 import { z } from 'zod';
 
+export enum GroupType {
+  HOME = 'HOME',
+  TRIP = 'TRIP',
+  COUPLE = 'COUPLE',
+  BUSINESS = 'BUSINESS',
+  FRIENDS = 'FRIENDS',
+  OTHER = 'OTHER',
+}
+
 // Validation schemas
 export const CreateGroupSchema = z.object({
   name: z.string().min(1, 'Group name is required').max(100, 'Group name must be less than 100 characters'),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   image: z.string().url('Invalid image URL').optional(),
+  type: z.nativeEnum(GroupType).default(GroupType.FRIENDS),
 });
 
 export const UpdateGroupSchema = z.object({
   name: z.string().min(1, 'Group name is required').max(100, 'Group name must be less than 100 characters').optional(),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   image: z.string().url('Invalid image URL').optional(),
+  type: z.nativeEnum(GroupType).optional(),
 });
 
 export const GroupMemberRoleSchema = z.enum(['member', 'admin']);
@@ -36,6 +47,7 @@ export interface Group {
   name: string;
   description?: string;
   image?: string;
+  type: GroupType;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -70,6 +82,7 @@ export interface GroupSummary {
   id: string;
   name: string;
   image?: string;
+  type: GroupType;
   memberCount: number;
   totalExpenses: number;
   yourBalance: number;

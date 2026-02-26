@@ -9,13 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Users, ChevronRight } from 'lucide-react';
-import { getInitials } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
+import { getGroupTypeConfig } from '@/lib/constants/group-types';
 
 interface Group {
   id: string;
   name: string;
   description: string | null;
   image: string | null;
+  type: string;
   createdBy: string;
   _count?: { members: number; expenses: number };
 }
@@ -85,38 +87,47 @@ export default function GroupsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {groups.map((group) => (
-            <Link key={group.id} href={`/groups/${group.id}`}>
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {getInitials(group.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-base">{group.name}</CardTitle>
-                        {group.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                            {group.description}
-                          </p>
-                        )}
+          {groups.map((group) => {
+            const typeConfig = getGroupTypeConfig(group.type || 'FRIENDS');
+            const TypeIcon = typeConfig.icon;
+
+            return (
+              <Link key={group.id} href={`/groups/${group.id}`}>
+                <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {getInitials(group.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-base">{group.name}</CardTitle>
+                          {group.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                              {group.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Badge variant="secondary">
-                    <Users className="h-3 w-3 mr-1" />
-                    {group._count?.members || '?'} members
-                  </Badge>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  </CardHeader>
+                  <CardContent className="pt-0 flex gap-2">
+                    <Badge variant="outline" className={cn('text-xs', typeConfig.badgeColor)}>
+                      <TypeIcon className="h-3 w-3 mr-1" />
+                      {typeConfig.label}
+                    </Badge>
+                    <Badge variant="secondary">
+                      <Users className="h-3 w-3 mr-1" />
+                      {group._count?.members || '?'} members
+                    </Badge>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

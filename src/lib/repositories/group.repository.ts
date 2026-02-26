@@ -19,6 +19,7 @@ export class GroupRepository {
         name: data.name,
         description: data.description,
         image: data.image,
+        type: data.type || 'FRIENDS',
         createdBy: data.createdBy,
       },
     });
@@ -71,6 +72,7 @@ export class GroupRepository {
         ...(data.name && { name: data.name }),
         ...(data.description !== undefined && { description: data.description }),
         ...(data.image !== undefined && { image: data.image }),
+        ...(data.type !== undefined && { type: data.type }),
       },
     });
 
@@ -91,6 +93,7 @@ export class GroupRepository {
         id: true,
         name: true,
         image: true,
+        type: true,
         _count: {
           select: {
             members: true,
@@ -111,6 +114,7 @@ export class GroupRepository {
         id: true,
         name: true,
         image: true,
+        type: true,
         _count: {
           select: {
             members: true,
@@ -131,6 +135,7 @@ export class GroupRepository {
       id: group.id,
       name: group.name,
       image: group.image,
+      type: group.type,
       memberCount: group._count.members + 1, // +1 for creator
       totalExpenses: group._count.expenses,
       yourBalance: 0, // TODO: Calculate actual balance
@@ -251,6 +256,7 @@ export class GroupRepository {
         id: true,
         name: true,
         image: true,
+        type: true,
         _count: {
           select: {
             members: true,
@@ -264,6 +270,7 @@ export class GroupRepository {
       id: group.id,
       name: group.name,
       image: group.image,
+      type: group.type,
       memberCount: group._count.members + 1,
       totalExpenses: group._count.expenses,
       yourBalance: 0, // TODO: Calculate actual balance

@@ -20,6 +20,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -44,6 +51,7 @@ import {
   Users,
 } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
+import { GROUP_TYPES } from '@/lib/constants/group-types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -64,6 +72,7 @@ interface GroupDetail {
   id: string;
   name: string;
   description: string | null;
+  type: string;
   createdBy: string;
   members: GroupMember[];
   expenses: Array<{ id: string }>;
@@ -135,6 +144,7 @@ export default function GroupSettingsPage() {
   // Edit group form
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editType, setEditType] = useState('FRIENDS');
   const [saving, setSaving] = useState(false);
 
   // Friends for invite
@@ -173,6 +183,7 @@ export default function GroupSettingsPage() {
         setGroup(g);
         setEditName(g.name || '');
         setEditDescription(g.description || '');
+        setEditType(g.type || 'FRIENDS');
       } else {
         toast({ variant: 'destructive', title: 'Failed to load group' });
       }
@@ -226,6 +237,7 @@ export default function GroupSettingsPage() {
         body: JSON.stringify({
           name: editName.trim(),
           description: editDescription.trim() || null,
+          type: editType,
         }),
       });
 
@@ -473,6 +485,27 @@ export default function GroupSettingsPage() {
               rows={3}
               className="resize-none"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="group-type">Group Type</Label>
+            <Select value={editType} onValueChange={setEditType}>
+              <SelectTrigger id="group-type">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {GROUP_TYPES.map((gt) => {
+                  const Icon = gt.icon;
+                  return (
+                    <SelectItem key={gt.value} value={gt.value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {gt.label}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
           <Button onClick={handleSaveGroup} disabled={saving}>
             {saving ? (

@@ -266,6 +266,10 @@ export interface ExpenseFilters {
   settled?: boolean;
   limit?: number;
   offset?: number;
+  search?: string;
+  amountMin?: number;
+  amountMax?: number;
+  paidByUserId?: string;
 }
 
 export interface ExpenseSummary {
